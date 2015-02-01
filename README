@@ -1,0 +1,17 @@
+A Julia based code to calculate atomic bond-angle distribution from
+molecular dynamics simulations. 
+
+Copyright (2015) Stefan Bringuier
+This software is distributed under the GNU General Public License.
+See LICENSE file for more details.
+
+Program Hierarchy:
+README		this file
+LICENSE		the GNU General Public License (GPL)
+src/		source files
+		--neighbor.jl		calculate neighbor list
+		--angle.jl 		calculate bond angles
+		--readdump.jl		read LAMMPS dump format
+			   
+			 			   	  
+
