@@ -9,6 +9,7 @@
 #   See the README file for program description.
 #------------------------------------------------------------------------- 
 
+#TODO - Memory usage is significant, try to optimize
 function neighborlist(pos,types,natoms,boxd,rcut)
     ## Function to Build neighbor list of atoms
 
@@ -17,11 +18,11 @@ function neighborlist(pos,types,natoms,boxd,rcut)
     
     #Initialize,list comprehensions
     index = [ i for i=1:natoms ] # or [1:natoms]
-    neighlist = [ Int32[] for i=1:natoms ] #Array of type Int32 to store atom IDs
+    neighlist = [ Int32[] for i=1:natoms ] #Array of type Int32 Arrays to store atom IDs
     rij_arry = zeros(Float32,natoms,natoms,3) # Distance array, Float32 type to save on memory
     
     for i=1:natoms
-        #
+
         #sizehint(neighlist[i],convert(Int,round(natoms/2)))
         
         #PBC - Min. Image Conv., origin 0,0,0
@@ -45,6 +46,7 @@ function neighborlist(pos,types,natoms,boxd,rcut)
     return neighlist, rij_arry
 end
 
+#TODO - Untested
 function neighborlist_bf(pos,types,natoms,boxd,rcut)
     ## Function to Build neighbor list of atoms: Bruteforce
        
