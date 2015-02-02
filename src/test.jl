@@ -9,23 +9,13 @@
 #
 #   See the README file for program description.
 #------------------------------------------------------------------------- 
-include("neighbor.jl")
-include("angle.jl")
 
-#Tester Functions
-function tester(flag=1)
-    if flag == 1
-        tester1()
-    elseif flag == 2
-        tester2()
-    elseif flag == 3
-        tester3()
-    end
-end
 
-function tester1()
+function tester1(func::Function)
     # run test on neighbor list cubic diamond Silicon
-    #include("neighbor.jl")
+    # func::Function - should be a function that builds a neighborlist and returns
+    # the neighborlist and distance array.
+
     println("Running Test 1:")
     println("Neighbor list build test for cubic diamond Silicon (PBC)")
 
@@ -45,7 +35,7 @@ function tester1()
     types = Int[1,1,1,1,1,1,1,1] 
     rcut = 2.50 # Si-Si Angstroms
 
-    neighlist,rijarry = neighborlist(pos,types,natoms,boxd,rcut)
+    neighlist,rijarry = func(pos,types,natoms,boxd,rcut)
 
     for i=1:natoms
         if length(neighlist[i]) != 4
@@ -57,7 +47,12 @@ function tester1()
 end
    
 
-function tester2()
+function tester2(func1::Function,func2::Function)
+    # Run bond angle test on  cubic diamond Silicon
+    # func1::Function - should be a function that builds a neighborlist and returns
+    # the neighborlist and distance array.
+    # func2::Function - a function which calculates the bond angles and returns an array.
+
     println("Running Test 2:")
     println("Angle calculation routine test")
 
@@ -77,9 +72,9 @@ function tester2()
     types = Int[1,1,1,1,1,1,1,1] 
     rcut = 2.50 # Si-Si Angstroms
 
-    neighlist,rijarry = neighborlist(pos,types,natoms,boxd,rcut)
+    neighlist,rijarry = func1(pos,types,natoms,boxd,rcut)
     
-    angleall = angle(natoms,rijarry,types,neighlist)
+    angleall = func2(natoms,rijarry,types,neighlist)
 
     if any((angleall[:,end] .< 106.00 ) | (angleall[:,end] .> 112.00))
         println("Bond angle failed!")
@@ -92,3 +87,22 @@ end
 function tester3()
     println("Not implemented!")
 end
+
+#TODO - add command-line parser
+## Main ##
+include("neighbor.jl")
+include("angle.jl")
+
+
+flag = ARGS[1]
+
+if flag == "1"
+    @time tester1(neighborlist)
+elseif flag == "2"
+    @time tester2(neighborlist,angle)
+elseif flag == "3"
+    tester3()
+else
+    println("No test function selected")
+end
+
