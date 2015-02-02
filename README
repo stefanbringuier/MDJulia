@@ -11,7 +11,9 @@ LICENSE		the GNU General Public License (GPL)
 src/		source files
 		--neighbor.jl		calculate neighbor list
 		--angle.jl 		calculate bond angles
-		--readdump.jl		read LAMMPS dump format
+		--lattice.jl		generate various lattices
+		--test.jl 		contains unittest for functions
+		--readdump.jl		read LAMMPS dump format(not implemented yet)
 			   
 			 			   	  
 
