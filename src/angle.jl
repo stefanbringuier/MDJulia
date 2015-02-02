@@ -10,21 +10,24 @@
 #   See the README file for program description.
 #------------------------------------------------------------------------- 
 
+function angle(natoms,rdist,types,neighlist)
 
-function angle(natoms,dist,types,neighlist)
     anglelist = Vector{Float64}[] #Empty Vector containg Array of float64 type
     for i=1:natoms
         itype = types[i]
-        for jpair in enumerate(neighlist[i])
-            jtype = types[pair[2]]
-            for kpair in enumerate(neighlist[j])
-                ktype = types[kpair[2]]
-                rij = rdist[i,j,:]
-                rik = rdist[i,k,:]
-                dotprod = rij * rik
+        for jpair in enumerate(neighlist[i][1:end-1]) #jpair is a tuple (index,entry)
+            jtype = types[jpair[2]]
+            j = jpair[2]
+            for k in neighlist[i][jpair[1]+1:end]
+                ktype = types[k]
+
+                rij = reshape(rdist[i,j,:],3) #reshape to column vector
+                rik = reshape(rdist[i,k,:],3)
+               
+                dotprod = dot(rij,rik) 
                 
-                magv1 = √(∑(rij.^2))
-                magv2 = √(∑(rik.^2))
+                magv1 = √(sum(rij.^2))
+                magv2 = √(sum(rik.^2))
                 
                 costheta = dotprod / (magv1*magv2)
                 
@@ -33,22 +36,23 @@ function angle(natoms,dist,types,neighlist)
                 #an Array of size n,1 where the entry corresponds to
                 #an array. What I really want is an Array of Float64 that is
                 #of the size n by 4
-                push!(anglelist,[i,pairj[1],pairk[1],costheta])
-
+                push!(anglelist,[itype,jtype,ktype,costheta])                
              end
         end
     end
 
+    
     #NOTE - anglelist is not an n x 4 Array{Float64,2}
     # however I want an array of n x 4
     n = length(anglelist) 
     m = length(anglelist[1])
     anglearry = zeros(n,m)
     for i=1:n
-        entry = b[n]
+        entry = anglelist[i]
         theta = rad2deg(acos(entry[end]))
-        anglearry[i,:end-1] = entry[end-1]
+        anglearry[i,1:end-1] = entry[end-1]
         anglearry[i,end] = theta
     end
 
     return anglearry
+end
