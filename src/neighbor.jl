@@ -8,7 +8,7 @@
 #
 #   See the README file for program description.
 #------------------------------------------------------------------------- 
-
+module neighbor
 #TODO - Memory usage is significant, try to optimize
 function neighborlist(pos,types,natoms,boxd,rcut)
     ## Function to Build neighbor list of atoms
@@ -77,4 +77,6 @@ function neighborlist_bf(pos,types,natoms,boxd,rcut)
         end
     end
     return neighlist
+end
+
 end

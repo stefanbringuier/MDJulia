@@ -10,6 +10,7 @@
 #   See the README file for program description.
 #------------------------------------------------------------------------- 
 
+module angle
 function angle(natoms,rdist,types,neighlist)
 
     anglelist = Vector{Float64}[] #Empty Vector containg Array of float64 type
@@ -55,4 +56,6 @@ function angle(natoms,rdist,types,neighlist)
     end
 
     return anglearry
+end
+
 end

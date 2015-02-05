@@ -10,8 +10,9 @@
 #   See the README file for program description.
 #------------------------------------------------------------------------- 
 
+module lattice
 
-function simplecubic(multiple,latparam)
+function scubic(multiple,latparam)
     #Generate simple cubic structure 
     # multiple should be a tuple like object
     
@@ -35,3 +36,33 @@ function simplecubic(multiple,latparam)
     end
     return types,lattice
 end
+
+function fccubic(multiple,latparam)
+    #Generate face-centered cubic structure 
+    # multiple should be a tuple like object
+    
+    basis = [0.0 0.0 0.0;
+             0.5 0.5 0.0;
+             0.5 0.0 0.5;
+             0.0 0.5 0.5] #4x3 Array
+    N = size(basis,1)*multiple[1]*multiple[2]*multiple[3]
+    
+    lattice = zeros(N,3)
+    types = [ 1 for i=1:N*length(basis)]
+    
+    n = 1 #Atomic index
+    #Origin: 0,0,0
+    for i=0:multiple[1]-1
+        for j=0:multiple[2]-1
+            for k=0:multiple[3]-1
+                lattice[n,1] = (i+basis[1])*latparam
+                lattice[n,2] = (j+basis[2])*latparam
+                lattice[n,3] = (k+basis[3])*latparam
+                n += 1
+            end
+        end
+    end
+    return types,lattice
+end
+
+end 

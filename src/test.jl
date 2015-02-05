@@ -84,8 +84,13 @@ function tester2(func1::Function,func2::Function)
     
 end
    
-function tester3()
-    println("Not implemented!")
+function tester3(filename)
+    # For now just use old python read function
+    #move to proper path
+    using PyCall
+    #unshift!(PyVector(pyimport("sys")["path"]), "./python")
+    #pycall(readdump,PyAny,filename,5,1,1)
+    #println("Not implemented!")
 end
 
 #TODO - add command-line parser
@@ -101,7 +106,7 @@ if flag == "1"
 elseif flag == "2"
     @time tester2(neighborlist,angle)
 elseif flag == "3"
-    tester3()
+    tester3(ARGS[2])
 else
     println("No test function selected")
 end
