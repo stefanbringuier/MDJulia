@@ -8,73 +8,72 @@
 #
 #   See the README file for program description.
 #------------------------------------------------------------------------- 
-module read
+module readlammps
 
 #TODO - see if you can rewrite this in a better fashion
-function readdump(FileName,SnapShots,SaveSnap,Nfield,gzipf=False,scaled=False):
+function readdump(FileName,SnapShots,SaveSnap,Nfield,scaled=false)
     ##read lammps dumpfile with header saved for specified file
     ##number of atoms cannot change
     ##format: id type x y z .....
     ##"""
 
-    #if gzipf == True
-    #    #File = gzip.open(FileName,'r')
-    #else
-        #File = open(FileName,'r')
-   # end
     file = open(FileName)
-    #Get number of atoms then rewind
+
+    #Get number of atoms and box then rewind
     garb1 = readline(file)
     garb2 = readline(file)
     garb3 = readline(file)
     numatoms= int(readline(file))
     garb4 = readline(file)
+    #Exception to see if tilt factor is included, only 1 line
+    flag = false
     try
         testxlo,testxhi,testxy = float(split(readline(f)))
-        Flag = 0
     catch
-        Flag = 1
+        flag = true
     end
-
     seek(file,0)
-
-    data = zeros(numatoms,Nfield,SnapShots)
     
-    t = 0
-    while t < SnapShots
+    #Start reading dumpfile
+    data = zeros(numatoms,Nfield,SnapShots)
+    t = 1
+    while t <= SnapShots
         #read header
         h1 = readline(file)
         tmptime = readline(file)
         h2 = readline(file)
         tmpatoms = readline(file)
         h3 = readline(file)
-        if Flag != 1:
-            tmpxlo,tmpxhi,tmpxy = readline(file).strip('\n').split()
-            tmpylo,tmpyhi,tmpxz = readline(file).strip('\n').split()
-            tmpzlo,tmpzhi,tmpyz = readline(file).strip('\n').split()        
-        else:
-            tmpxlo,tmpxhi = File.readline().strip('\n').split()
-            tmpylo,tmpyhi = File.readline().strip('\n').split()
-            tmpzlo,tmpzhi = File.readline().strip('\n').split()
+        #Based on parsing of box
+        if flag != true
+            tmpxlo,tmpxhi,tmpxy = split(readline(file))
+            tmpylo,tmpyhi,tmpxz = split(readline(file))
+            tmpzlo,tmpzhi,tmpyz = split(readline(file))
+        else
+            tmpxlo,tmpxhi = split(readline(file))
+            tmpylo,tmpyhi = split(readline(file))
+            tmpzlo,tmpzhi = split(readline(file))
             tmpxy,tmpxz,tmpyz = 0.00,0.00,0.00
-
+        end
         h4 = readline(file)
 
-        if t == SaveSnap:
+        #Save desired configuration box (tuple)
+        if t == SaveSnap
             xlo_bound,xhi_bound,xy = tmpxlo,tmpxhi,tmpxy
             ylo_bound,yhi_bound,xz = tmpylo,tmpyhi,tmpxz
             zlo_bound,zhi_bound,yz = tmpzlo,tmpzhi,tmpyz
-
-        for a in range(numatoms):
+        end
+        #Read atomic positions etc.
+        for a = 1:numatoms
             #Read string -> strip '\n' char -> split into new list
-            line = File.readline().strip('\n').split()
-            data[a,:,t] = line
-
+            line = readline(file)
+            data[a,:,t] = float(split(line))
+        end
         t += 1
     end
-    File.close()
+    close(file)
     
-    #only use data for SaveSnap
+    #only return data for SaveSnap
     datasave = data[:,:,SaveSnap]
     
     #Convert data types & LAMMPS Dump bounding box
@@ -91,13 +90,13 @@ function readdump(FileName,SnapShots,SaveSnap,Nfield,gzipf=False,scaled=False):
     zhi  = zhi_bound
     
     #    Shift box to origin 0,0,0
-    if xlo < 0.00:
+    if xlo < 0.00
        datasave[:,2] += abs(xlo)
-    if ylo < 0.00:
+    elseif ylo < 0.00
        datasave[:,3] += abs(ylo)
-    if zlo < 0.00:
+    elseif zlo < 0.00
        datasave[:,4] += abs(zlo)
-
+    end
     
     #Define box lengths and tilts
     lx = xhi - xlo
@@ -106,19 +105,19 @@ function readdump(FileName,SnapShots,SaveSnap,Nfield,gzipf=False,scaled=False):
 
     #lbox = [lx,ly,lz]
     #ltilt = [xy,xz,yz]
-    boxarry = np.array([[lx,0.,0.],
-                      [xy,ly,0.],
-                      [xz,yz,lz]])
+    boxarry = [lx 0.0 0.0;
+              0.0 ly 0.0;
+              0.0 0.0 lz]
     #boxarry = boxarry.T
-    print 'Simulation Box: '
-    print boxarry
+    println("Simulation Box Dimensions: ")
+    println(boxarry)
     
     #If scaled coordinates unscale
-    if scaled == True:
+    if scaled == true
         datasave[:,2] *= lx
         datasave[:,3] *= ly
         datasave[:,4] *= lz
-
+    end
 
     return numatoms,boxarry,datasave
 end
