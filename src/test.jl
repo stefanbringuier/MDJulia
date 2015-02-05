@@ -84,29 +84,32 @@ function tester2(func1::Function,func2::Function)
     
 end
    
-function tester3(filename)
-    # For now just use old python read function
-    #move to proper path
-    using PyCall
-    #unshift!(PyVector(pyimport("sys")["path"]), "./python")
-    #pycall(readdump,PyAny,filename,5,1,1)
-    #println("Not implemented!")
+function tester3(readfunction,file)
+    try
+        readfunction(file,1,1,5)
+    catch err
+        println("Could not read file: $err")
+    end
 end
 
 #TODO - add command-line parser
 ## Main ##
-include("neighbor.jl")
-include("angle.jl")
-
+#include("neighbor.jl")
+#include("angle.jl")
+#Load in current working directory
+push!(LOAD_PATH,pwd())
+using neighbor
+using angle
+using readlammps
 
 flag = ARGS[1]
 
 if flag == "1"
-    @time tester1(neighborlist)
+    @time tester1(neighbor.neighborlist)
 elseif flag == "2"
-    @time tester2(neighborlist,angle)
+    @time tester2(neighbor.neighborlist,angle.anglecalc)
 elseif flag == "3"
-    tester3(ARGS[2])
+    tester3(readlammps.readdump,"../testfiles/dump.NiTi")
 else
     println("No test function selected")
 end

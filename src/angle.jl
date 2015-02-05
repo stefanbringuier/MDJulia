@@ -11,8 +11,8 @@
 #------------------------------------------------------------------------- 
 
 module angle
-function angle(natoms,rdist,types,neighlist)
 
+function anglecalc(natoms,rdist,types,neighlist)
     anglelist = Vector{Float64}[] #Empty Vector containg Array of float64 type
     for i=1:natoms
         itype = types[i]
