@@ -13,7 +13,7 @@ src/		source files
 		--angle.jl 		calculate bond angles
 		--lattice.jl		generate various lattices
 		--test.jl 		contains unittest for functions
-		--readdump.jl		read LAMMPS dump format(not implemented yet)
+		--readlammps.jl		read LAMMPS dump and data format 
 			   
 			 			   	  
 
