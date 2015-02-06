@@ -109,8 +109,8 @@ function readdump(FileName,SnapShots,SaveSnap,Nfield,scaled=false)
               0.0 ly 0.0;
               0.0 0.0 lz]
     #boxarry = boxarry.T
-    println("Simulation Box Dimensions: ")
-    println(boxarry)
+    #println("Simulation Box Dimensions: ")
+    #println(boxarry)
     
     #If scaled coordinates unscale
     if scaled == true

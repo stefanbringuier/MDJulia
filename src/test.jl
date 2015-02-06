@@ -20,7 +20,7 @@ function tester1(func::Function)
     println("Neighbor list build test for cubic diamond Silicon (PBC)")
 
     boxd =  [5.43 0. 0.;
-             0. 5.43 0.;
+             0. 5.43 0.; 
              0. 0. 5.43]
     natoms = 8
     frac = [0.0 0.0 0.0; 
@@ -84,11 +84,22 @@ function tester2(func1::Function,func2::Function)
     
 end
    
-function tester3(readfunction,file)
+function tester3(readfunction::Function,file)
     try
         readfunction(file,1,1,5)
     catch err
         println("Could not read file: $err")
+    end
+end
+
+function tester4(writefunction::Function,f)
+    #Creat lattice
+    typ,box,pos = lattice.fccubic((4,4,4),3.80)
+    lx,ly,lz = maximum(pos[:,1]),maximum(pos[:,2]),maximum(pos[:,3])
+    try
+        writefunction(1,box,typ,pos,file=f)
+    catch err
+        println("Could not write file: $err")
     end
 end
 
@@ -101,6 +112,8 @@ push!(LOAD_PATH,pwd())
 using neighbor
 using angle
 using readlammps
+using writelammps
+using lattice
 
 flag = ARGS[1]
 
@@ -109,7 +122,8 @@ if flag == "1"
 elseif flag == "2"
     @time tester2(neighbor.neighborlist,angle.anglecalc)
 elseif flag == "3"
-    tester3(readlammps.readdump,"../testfiles/dump.NiTi")
+    @time tester3(readlammps.readdump,"../testfiles/dump.NiTi")
+    @time tester4(writelammps.writedump,"../testfiles/dump.fccubic.testcase")
 else
     println("No test function selected")
 end

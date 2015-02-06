@@ -13,7 +13,6 @@
 # i.e. one function for any structure
 module lattice
 
-
 #Define C struc like object
 type Atom
     id::Int
@@ -64,9 +63,14 @@ function fccubic(multiple,latparam)
              0.5 0.0 0.5;
              0.0 0.5 0.5] #4x3 Array
     N = size(basis,1)*multiple[1]*multiple[2]*multiple[3]
-    
+    lx = (multiple[1]+1)*latparam # plus one is for PBC
+    ly = (multiple[2]+1)*latparam 
+    lz = (multiple[3]+1)*latparam 
+    cell = [lx 0.0 0.0;
+            0.0 ly 0.0;
+            0.0 0.0 lz]
     lattice = zeros(N,3)
-    types = [ 1 for i=1:N*size(basis,1)]
+    types = [ 1 for i=1:N]
     
     #TODO - reduce loops (i.e. vector operations)
     n = 1 #Atomic index
@@ -83,7 +87,7 @@ function fccubic(multiple,latparam)
             end
         end
     end
-    return types,lattice
+    return types,cell,lattice
 end
 
 
@@ -97,7 +101,7 @@ function bccubic(multiple,latparam)
     N = size(basis,1)*multiple[1]*multiple[2]*multiple[3]
     
     lattice = zeros(N,3)
-    types = [ 1 for i=1:N*size(basis,1)]
+    types = [ 1 for i=1:N]
     
     #TODO - reduce loops (i.e. vector operations)
     n = 1 #Atomic index
@@ -134,7 +138,7 @@ function diamond(multiple,latparam)
     N = size(basis,1)*multiple[1]*multiple[2]*multiple[3]
     
     lattice = zeros(N,3)
-    types = [ 1 for i=1:N*size(basis,1)]
+    types = [ 1 for i=1:N]
     
     #TODO - reduce loops (i.e. vector operations)
     n = 1 #Atomic index
