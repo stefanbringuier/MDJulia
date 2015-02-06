@@ -19,16 +19,9 @@ src/		source files
 		--orderparam.jl         measure the order parameter of NiTi from Mutter et. al APL 2011					   
 			 			   	  
 
-
-This code is a collection of Julia modules which contain various functions related to
-analyzing molecular dynamics simulation trajectories from the LAMMPS package. 
-The code was written for two purpose:
+This code is a collection of Julia modules which contain various functions related to analyzing molecular dynamics simulation trajectories from the LAMMPS package. The code was written for two purposes:
 
 1. For me to learn Julia which I believe is a very very promising language. 
-2. Provide an optimized version with regards to the python based bond angle analysis code.
+2. Provide an optimized version with regards to the my python based bond angle analysis code.
 
-Due to the Julia languages use of JIT compiling I'm hoping that this will provide the required 
-performance increase (without resorting to parallelization) that I desire, especially for the bond 
-angle routine which scales poorly. If anyone has a better algorithm for this please let me know, 
-it would be much appreciated. Additionally, if you think there are better ways to do things in 
-Julia, in contrast to how I have done them please let me know.
+Since Julia makes use of JIT compiling I'm hoping that this will provide the required performance increase (without resorting to parallelization) that I desire, especially for the bond angle routine which scales poorly. If anyone has a better algorithm for this please let me know, it would be much appreciated. Additionally, if you think there are better ways to code in Julia in contrast to how I have done them, please let me know.
