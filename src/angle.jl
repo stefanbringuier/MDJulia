@@ -12,6 +12,22 @@
 
 module angle
 
+#Docstring function should be supported in Julia v0.4
+#@doc """ Calculate Bond Angle Distribution
+# Inputs:
+# natoms - number of atoms
+# rdist - multidimension array of seperation vectors between 
+#         atoms i and j. Same as rij_arry in neighbor.jl
+# type -  array of atomic types
+# neighlist - neighbor list for atomic configuration (see neighbor.jl)
+#
+# Outputs:
+# anglearry - 2D array of bond angles format: i j k theta.
+#             Atom i is the central atom.
+#
+#TODO - Optimize if possible.
+#       Reduce number of function inputs.
+#""" ->
 function anglecalc(natoms,rdist,types,neighlist)
     anglelist = Vector{Float64}[] #Empty Vector containg Array of float64 type
     for i=1:natoms

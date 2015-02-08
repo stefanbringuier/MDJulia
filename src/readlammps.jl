@@ -10,8 +10,22 @@
 #------------------------------------------------------------------------- 
 module readlammps
 
-#TODO - see if you can rewrite this in a better fashion
-function readdump(FileName,SnapShots,SaveSnap,Nfield,scaled=false)
+#Docstring function should be supported in Julia v0.4
+#@doc """ Read LAMMPS dumpfile format
+# Inputs:
+# FileName - file
+# SnapShots - number of trajectories/frames (default=1)
+# SaveSnap - which trajectory to save for processing (default=1)
+# Scaled - units scaled (default=false)
+#
+# Outputs:
+# numatoms - number of atoms
+# boxarry - box dimensions as an array
+# datasave - atom id type x y z for specified trajectory
+#
+#TODO - see if this can be rewritten so that SnapShots is not required
+#""" ->
+function readdump(FileName,SnapShots=1,SaveSnap=1,scaled=false)
     ##read lammps dumpfile with header saved for specified file
     ##number of atoms cannot change
     ##format: id type x y z .....
@@ -19,7 +33,9 @@ function readdump(FileName,SnapShots,SaveSnap,Nfield,scaled=false)
 
     file = open(FileName)
 
-    #Get number of atoms and box then rewind
+    #Parse first snapshot header get simulation info
+    #i.e. number of atoms, box dimensions, number of columns
+    #then rewind file 
     garb1 = readline(file)
     garb2 = readline(file)
     garb3 = readline(file)
@@ -27,17 +43,26 @@ function readdump(FileName,SnapShots,SaveSnap,Nfield,scaled=false)
     garb4 = readline(file)
     #Exception to see if tilt factor is included, only 1 line
     flag = false
+    vec1 = readline(file)
     try
-        testxlo,testxhi,testxy = float(split(readline(f)))
+        testxlo,testxhi,testxy = float(split(vec1))
     catch
         flag = true
     end
+    #Go to Column header line
+    #skip(file,2)
+    vec2 = readline(file)
+    vec3 = readline(file)
+    #ITEM ATOM: id type x y z .....
+    nfield = size(split(readline(file)),1)-2
+    #Go back to beginning
     seek(file,0)
     
     #Start reading dumpfile
-    data = zeros(numatoms,Nfield,SnapShots)
+    data = zeros(numatoms,nfield,SnapShots)
     t = 1
-    while t <= SnapShots
+    #while t <= SnapShots
+     while !eof(file)
         #read header
         h1 = readline(file)
         tmptime = readline(file)

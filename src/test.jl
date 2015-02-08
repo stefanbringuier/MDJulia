@@ -10,8 +10,21 @@
 #   See the README file for program description.
 #------------------------------------------------------------------------- 
 
+#TODO - add command-line parser
+#include("neighbor.jl")
+#include("angle.jl")
+#Load in current working directory
+push!(LOAD_PATH,pwd())
+using Base.Test
+using neighbor
+using angle
+using readlammps
+using writelammps
+using lattice
+using orderparam
 
-function tester1(func::Function)
+
+function testneighbor(func::Function)
     # run test on neighbor list cubic diamond Silicon
     # func::Function - should be a function that builds a neighborlist and returns
     # the neighborlist and distance array.
@@ -38,23 +51,20 @@ function tester1(func::Function)
     neighlist,rijarry = func(pos,types,natoms,boxd,rcut)
 
     for i=1:natoms
-        if length(neighlist[i]) != 4
-            println("Atom: $i fail")
-        else
-            println("Atom: $i pass")
-        end
+        @test length(neighlist[i]) == 4 
     end
+    println("Test 1 Passed!")
 end
    
 
-function tester2(func1::Function,func2::Function)
+function testangle(func1::Function,func2::Function)
     # Run bond angle test on  cubic diamond Silicon
     # func1::Function - should be a function that builds a neighborlist and returns
     # the neighborlist and distance array.
     # func2::Function - a function which calculates the bond angles and returns an array.
 
     println("Running Test 2:")
-    println("Angle calculation routine test")
+    println("Bond Angle calculation Routine")
 
     boxd =  [5.43 0. 0.;
              0. 5.43 0.;
@@ -75,24 +85,34 @@ function tester2(func1::Function,func2::Function)
     neighlist,rijarry = func1(pos,types,natoms,boxd,rcut)
     
     angleall = func2(natoms,rijarry,types,neighlist)
+    
+    #TODO - use test macro 
+    #for i=1:natoms
+    #    @test_approx_eq_eps angle[i,end] 109.430 1.0e-2
+    #end
 
     if any((angleall[:,end] .< 106.00 ) | (angleall[:,end] .> 112.00))
-        println("Bond angle failed!")
-    else
-        println("Bond angle passed!")
+        throw(error("Failed angle unit test"))
     end
-    
+
+    println("Test 2 Passed!")
 end
    
-function tester3(readfunction::Function,file)
+function testread(readfunction::Function,file)
+    println("Running Test 3:")
+    println("Read LAMMPS dump style format file")
+
     try
-        readfunction(file,1,1,5)
+        readfunction(file,1)
     catch err
         println("Could not read file: $err")
     end
 end
 
-function tester4(writefunction::Function,f)
+function testwrite(writefunction::Function,f)
+    println("Running Test 4:")
+    println("Write LAMMPS dump style format file")
+
     #Creat lattice
     typ,box,pos = lattice.fccubic((4,4,4),3.80)
     lx,ly,lz = maximum(pos[:,1]),maximum(pos[:,2]),maximum(pos[:,3])
@@ -101,30 +121,43 @@ function tester4(writefunction::Function,f)
     catch err
         println("Could not write file: $err")
     end
+   
 end
 
-#TODO - add command-line parser
-## Main ##
-#include("neighbor.jl")
-#include("angle.jl")
-#Load in current working directory
-push!(LOAD_PATH,pwd())
-using neighbor
-using angle
-using readlammps
-using writelammps
-using lattice
+function testorderparam(f)
+        println("Running Test 5:")
+        println("NiTi order parameter")
+        n,b,d = readlammps.readdump(f,1,1,5)
+        neigh,rija = neighbor.neighborlist(d[:,3:end],d[:,2],n,b,5)
+        angles = angle.anglecalc(n,rija,d[:,2],neigh)
+        niti = orderparam.orderniti(n,d[:,2],neigh,rija)
+        for i=1:n
+            @test_approx_eq_eps niti[i] -1.0000 1.0e-2
+        end
+        println("Test 5 Passed!")
+end
 
-flag = ARGS[1]
+#Main
+flag=ARGS[1] 
 
 if flag == "1"
-    @time tester1(neighbor.neighborlist)
+    @profile begin
+        testneighbor(neighbor.neighborlist)
+    end
+    @profile Profile.print(format=:flat)
 elseif flag == "2"
-    @time tester2(neighbor.neighborlist,angle.anglecalc)
+    @time testangle(neighbor.neighborlist,angle.anglecalc)
 elseif flag == "3"
-    @time tester3(readlammps.readdump,"../testfiles/dump.NiTi")
-    @time tester4(writelammps.writedump,"../testfiles/dump.fccubic.testcase")
+    @time testread(readlammps.readdump,"../testfiles/dump.NiTi")
+    @time testwrite(writelammps.writedump,"../testfiles/dump.fccubic.testcase")
+elseif flag == "4"
+    @time testorderparam("../testfiles/dump.NiTi")
 else
-    println("No test function selected")
+    println("Testing all unit test functions!")
+    @time testneighbor(neighbor.neighborlist)
+    @time testangle(neighbor.neighborlist,angle.anglecalc)
+    @time testread(readlammps.readdump,"../testfiles/dump.NiTi")
+    @time testwrite(writelammps.writedump,"../testfiles/dump.fccubic.testcase")
+    @time testorderparam("../testfiles/dump.NiTi")
 end
 

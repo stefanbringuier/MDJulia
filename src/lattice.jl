@@ -122,7 +122,7 @@ function bccubic(multiple,latparam)
 end
 
 function diamond(multiple,latparam)
-    # Generate face-centered cubic structure 
+    # Generate diamond cubic structure 
     # multiple should be a tuple like object
     
     basis = [0.0 0.0 0.0;

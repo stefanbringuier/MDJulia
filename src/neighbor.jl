@@ -10,7 +10,25 @@
 #------------------------------------------------------------------------- 
 module neighbor
 
-#TODO - Memory usage is significant, try to optimize
+
+#Docstring function should be supported in Julia v0.4
+#@doc """ Build neighbor list for atomic configuration
+# Inputs:
+# pos - atomic positions in cartesian coordinates
+# types - array of atomic types
+# natoms - number of atoms
+# boxd - simulation cell dimensions (array)
+# rcut - cutoff distance to build neighbor list in units of position.
+# 
+# Outputs:
+# neighlist - neighbor list for atomic configuration
+# rij_arry - multidimension array of seperation vectors between 
+#             atoms i and j
+# 
+#TODO - Memory gc is fairly high try to optimize.
+#       Profiling shows high usage of abstract_eval()
+#       Reduce number of function inputs
+#""" ->
 function neighborlist(pos,types,natoms,boxd,rcut)
     ## Function to Build neighbor list of atoms
 
@@ -20,6 +38,8 @@ function neighborlist(pos,types,natoms,boxd,rcut)
     #Initialize,list comprehensions
     index = [ i for i=1:natoms ] # or [1:natoms]
     neighlist = [ Int32[] for i=1:natoms ] #Array of type Int32 Arrays to store atom IDs
+
+    #NOTE - this is probably a poor programming choice and I'm not sure it actually saves time
     rij_arry = zeros(Float32,natoms,natoms,3) # Distance array, Float32 type to save on memory
     
     for i=1:natoms
@@ -78,6 +98,10 @@ function neighborlist_bf(pos,types,natoms,boxd,rcut)
         end
     end
     return neighlist
+end
+
+function parallelneighborlist()
+    println("Not yet implemented!")
 end
 
 end
