@@ -39,8 +39,10 @@ function neighborlist(pos,types,natoms,boxd,rcut)
     index = [ i for i=1:natoms ] # or [1:natoms]
     neighlist = [ Int32[] for i=1:natoms ] #Array of type Int32 Arrays to store atom IDs
 
-    #NOTE - this is probably a poor programming choice and I'm not sure it actually saves time
-    rij_arry = zeros(Float32,natoms,natoms,3) # Distance array, Float32 type to save on memory
+    # NOTE - Causes issues with memory.
+    # NOTE - this is probably a poor programming choice and I'm not sure it actually saves time
+    # and is detrimental towards memory use 
+    # rij_arry = zeros(Float32,natoms,natoms,3) # Distance array, Float32 type to save on memory
     
     for i=1:natoms
 
@@ -61,10 +63,10 @@ function neighborlist(pos,types,natoms,boxd,rcut)
         #neighlist is somewhat like a list of empty lists
         keep = find(slice) 
         neighlist[i] = index[keep]
-        rij_arry[i,keep,:] = rij[keep,:]
+        #rij_arry[i,keep,:] = rij[keep,:]
 
     end
-    return neighlist, rij_arry
+    return neighlist #, rij_arry
 end
 
 #TODO - Untested

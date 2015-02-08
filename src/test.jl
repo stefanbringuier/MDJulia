@@ -8,7 +8,7 @@
 #   See LICENSE file for more details.
 #
 #   See the README file for program description.
-#------------------------------------------------------------------------- 
+2#------------------------------------------------------------------------- 
 
 #TODO - add command-line parser
 #include("neighbor.jl")
@@ -37,10 +37,10 @@ function testneighbor(func::Function)
              0. 0. 5.43]
     natoms = 8
     frac = [0.0 0.0 0.0; 
+            0.25 0.25 0.25;
             0.5 0.5 0.0; 
             0.5 0.0 0.5; 
-            0.0 0.5 0.5; 
-            0.25 0.25 0.25; 
+            0.0 0.5 0.5;  
             0.75 0.75 0.25; 
             0.75 0.25 0.75; 
             0.25 0.75 0.75]
@@ -48,8 +48,8 @@ function testneighbor(func::Function)
     types = Int[1,1,1,1,1,1,1,1] 
     rcut = 2.50 # Si-Si Angstroms
 
-    neighlist,rijarry = func(pos,types,natoms,boxd,rcut)
-
+    neighlist = func(pos,types,natoms,boxd,rcut)
+    println(neighlist)
     for i=1:natoms
         @test length(neighlist[i]) == 4 
     end
@@ -82,9 +82,9 @@ function testangle(func1::Function,func2::Function)
     types = Int[1,1,1,1,1,1,1,1] 
     rcut = 2.50 # Si-Si Angstroms
 
-    neighlist,rijarry = func1(pos,types,natoms,boxd,rcut)
+    neighlist = func1(pos,types,natoms,boxd,rcut)
     
-    angleall = func2(natoms,rijarry,types,neighlist)
+    angleall = func2(natoms,pos,types,neighlist,boxd)
     
     #TODO - use test macro 
     #for i=1:natoms
@@ -92,6 +92,7 @@ function testangle(func1::Function,func2::Function)
     #end
 
     if any((angleall[:,end] .< 106.00 ) | (angleall[:,end] .> 112.00))
+        println(angleall[:,end])
         throw(error("Failed angle unit test"))
     end
 
@@ -128,9 +129,9 @@ function testorderparam(f)
         println("Running Test 5:")
         println("NiTi order parameter")
         n,b,d = readlammps.readdump(f,1,1,5)
-        neigh,rija = neighbor.neighborlist(d[:,3:end],d[:,2],n,b,5)
-        angles = angle.anglecalc(n,rija,d[:,2],neigh)
-        niti = orderparam.orderniti(n,d[:,2],neigh,rija)
+        neigh = neighbor.neighborlist(d[:,3:end],d[:,2],n,b,5)
+        #angles = angle.anglecalc(n,d[:,3:end],d[:,2],neigh,b)
+        niti = orderparam.orderniti(n,d[:,2],neigh,d[:,3:end],b)
         for i=1:n
             @test_approx_eq_eps niti[i] -1.0000 1.0e-2
         end
@@ -151,7 +152,7 @@ elseif flag == "3"
     @time testread(readlammps.readdump,"../testfiles/dump.NiTi")
     @time testwrite(writelammps.writedump,"../testfiles/dump.fccubic.testcase")
 elseif flag == "4"
-    @time testorderparam("../testfiles/dump.NiTi")
+    @time testorderparam("../testfiles/dump.NiTiBig")
 else
     println("Testing all unit test functions!")
     @time testneighbor(neighbor.neighborlist)

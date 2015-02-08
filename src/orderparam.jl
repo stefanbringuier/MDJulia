@@ -11,7 +11,7 @@
 #------------------------------------------------------------------------- 
 module orderparam
 
-function orderniti(natoms,types,neighlist,rijvec)
+function orderniti(natoms,types,neighlist,pos,boxd)
     println("Calculating order parameter based on NiTi Mutter et al.")
 
     #Heuristic constants from Mutter et al. paper
@@ -22,6 +22,9 @@ function orderniti(natoms,types,neighlist,rijvec)
     const d1B2 = 2.611067
     orderp = zeros(natoms)
     
+    boxdinv = inv(boxd) #Invert matrix to scale coordinates
+    spos = pos * boxdinv #Here the * operator is an array-array operator
+
     # Bruteforce Approach to get distance 
     # between  i-j of different TYPES 
     dist = [ Float64[] for i=1:natoms ]
@@ -34,8 +37,16 @@ function orderniti(natoms,types,neighlist,rijvec)
             if itype == jtype #Only Ni-Ti bonds
                 continue
             end
-            # rijvec size n x n x3
-            rij = reshape(rijvec[i,j,:],(1,3))
+            
+            #TODO - How can I improve this?
+            #NOTE: spos[i,:] is 1x3 2D-Array
+            #PBC - Min. Image Conv., origin 0,0,0
+            sij = spos[j,:] - spos[i,:]
+            sij -= round(sij)
+            rij = vec(sij * boxd) 
+
+            # rijvec size n x n x3            
+            #rij = reshape(rijvec[i,j,:],(1,3))
             dij = √(sum(rij.^2))
             push!(tmpdij,dij)
         end
