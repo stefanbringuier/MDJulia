@@ -10,6 +10,8 @@
 #------------------------------------------------------------------------- 
 module readlammps
 
+#FIXME: Need to check if I'm correctly shifting to origin.
+
 #Docstring function should be supported in Julia v0.4
 #@doc """ Read LAMMPS dumpfile format
 # Inputs:
@@ -131,8 +133,8 @@ function readdump(FileName,SnapShots=1,SaveSnap=1,scaled=false)
     #lbox = [lx,ly,lz]
     #ltilt = [xy,xz,yz]
     boxarry = [lx 0.0 0.0;
-              0.0 ly 0.0;
-              0.0 0.0 lz]
+              xy ly 0.0;
+              xz yz lz]
     #boxarry = boxarry.T
     #println("Simulation Box Dimensions: ")
     #println(boxarry)
@@ -147,8 +149,84 @@ function readdump(FileName,SnapShots=1,SaveSnap=1,scaled=false)
     return numatoms,boxarry,datasave
 end
 
-function readdata()
-    println("Not implemented yet!")
+#@doc """ Read lammps data structure file
+#   Input:
+#    FileName - file name
+#   Output:
+#   numatoms - number of atoms
+#   boxarry - simulation box
+#   data - atomic coordinates
+#   NOTE: this is not a robust function to read
+#   lammps data file and thus you must strictly 
+#   adhere to the format of empty lines.
+#   TODO: implement keyword parser            
+# """ ->
+function readdata(FileName)
+    #format: id type x y z .....
+
+    file = open(FileName)
+
+    header = readline(file)
+    empty1 = readline(file) #emtpy line
+    numatoms = int(split(readline(file))[1])
+    atomtypes = int(split(readline(file))[1])
+    empty2 = readline(file) #emtpy line
+    xlo,xhi = float(split(readline(file))[1:2])
+    ylo,yhi = float(split(readline(file))[1:2])
+    zlo,zhi = float(split(readline(file))[1:2])
+    flag = false
+    try
+        xy,xz,yz = float(split(readline(file)))
+    catch
+        flag = true
+    end
+    if flag == true
+        xy,xz,yz = 0.00 , 0.00 , 0.00
+    else
+        empty3 = readline(file)
+    end
+
+    #empty3 = readline(file)
+    header1 = readline(file)
+    empty4 =  readline(file)
+    
+    #read coordinates
+    data = zeros(numatoms,5)
+    for i=1:numatoms
+        line = readline(file)
+        data[i,:] = float(split(line))
+    end 
+    close(file)
+ 
+    #FIXME: Forgot if data file needs this conversion
+    #Convert to vectors a,b,c
+    xlo  = xlo - min(0.0,xy,xz,xy+xz)
+    xhi  = xhi - max(0.0,xy,xz,xy+xz)
+    ylo  = ylo - min(0.0,yz)
+    yhi  = yhi - max(0.0,yz)
+    
+    #FIXME: This  isn't correct for nonorthogonal boxes
+    # Shift box to origin 0,0,0
+    if xlo < 0.00
+       data[:,2] += abs(xlo)
+    elseif ylo < 0.00
+       data[:,3] += abs(ylo)
+    elseif zlo < 0.00
+       data[:,4] += abs(zlo)
+    end
+    
+    #Define box lengths and tilts
+    lx = xhi - xlo
+    ly = yhi - ylo
+    lz = zhi - zlo
+
+    boxarry = [lx 0.0 0.0;
+              xy ly 0.0;
+              xz yz lz]
+    
+   
+    return numatoms,boxarry,data
+    
 end
 
 end
