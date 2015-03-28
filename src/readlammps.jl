@@ -9,7 +9,7 @@
 #   See the README file for program description.
 #------------------------------------------------------------------------- 
 module readlammps
-
+using types
 #FIXME: Need to check if I'm correctly shifting to origin.
 
 #Docstring function should be supported in Julia v0.4
@@ -146,6 +146,9 @@ function readdump(FileName,SnapShots=1,SaveSnap=1,scaled=false)
         datasave[:,4] *= lz
     end
 
+    #TODO - this is for when types Atoms is used
+    #atoms = Types.Atoms(numatoms,datasave[:,0],datasave[:,1],datasave[:,2:5])
+    #box = Types.Cell(boxarry,true)
     return numatoms,boxarry,datasave
 end
 
