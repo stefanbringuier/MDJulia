@@ -30,9 +30,11 @@ end
 type Cell
     cell::Array{Float64,2}
     cut::Float64
+    angcut::Float64
     pbc::Bool
     vol::Float64
-    Cell(cell,cut,pbc) = new(cell,cut,pbc,det(cell))
+    Cell(cell,cut,pbc) = new(cell,cut,cut,pbc,det(cell))
+    Cell(cell,cut,angcut,pbc) = new(cell,cut,angcut,pbc,det(cell))
 end
 
 type Sim

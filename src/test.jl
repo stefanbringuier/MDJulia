@@ -83,9 +83,9 @@ function testangle(func1::Function,func2::Function)
     types = Int[1,1,1,1,1,1,1,1] 
     rcut = 2.50 # Si-Si Angstroms
 
-    neighlist = func1(pos,types,natoms,boxd,rcut)
+    @time neighlist = func1(pos,types,natoms,boxd,rcut)
     
-    angleall = func2(natoms,pos,types,neighlist,boxd)
+    @time angleall = func2(natoms,pos,types,neighlist,boxd)
     
     #TODO - use test macro 
     #for i=1:natoms
@@ -138,7 +138,7 @@ function testorderparam(f)
         n,b,d = readlammps.readdump(f,1,1,5)
         #Convert types to integers
         d2 = int(d[:,2])
-        neigh = neighbor.neighborlist(d[:,3:end],d2,n,b,3.01) 
+        @time neigh = neighbor.build(d[:,3:end],d2,n,b,3.01) 
         
         @time t,i = angle.anglecalc(n,d[:,3:end],d2,neigh,b)
   
@@ -146,10 +146,7 @@ function testorderparam(f)
 
         savefig("winston_plot.pdf");
       
-      
-    
-    
-        #niti = orderparam.orderniti(n,d2,neigh,d[:,3:end],b)
+         #niti = orderparam.orderniti(n,d2,neigh,d[:,3:end],b)
         #for i=1:n
         #    @test_approx_eq_eps niti[i] -1.0000 1.0e-2
         #end
@@ -160,8 +157,9 @@ function testanglebig(f)
         println("Running Test 6:")
         println("NiTi angle time test on big cell")
         n,b,d = readlammps.readdump(f,1,1,5)
-        neigh = neighbor.neighborlist(d[:,3:end],d[:,2],n,b,5)
-        angle.anglecalc(n,d[:,3:end],d[:,2],neigh,b)
+        d2 = int(d[:,2])
+        @time neigh = neighbor.build(d[:,3:end],d2,n,b,5)
+        @time angle.anglecalc(n,d[:,3:end],d2,neigh,b)
 end
 
 
@@ -176,22 +174,22 @@ flag=ARGS[1]
 
 if flag == "1"
     @profile begin
-        testneighbor(neighbor.neighborlist)
+        testneighbor(neighbor.build)
     end
     @profile Profile.print(format=:flat)
 elseif flag == "2"
-     @time testangle(neighbor.neighborlist,angle.anglecalc)
+ testangle(neighbor.build,angle.anglecalc)
 elseif flag == "3"
     @time testread("../testfiles/dump.NiTi","../testfiles/data.B2-unitcell")
     @time testwrite(writelammps.writedump,"../testfiles/dump.fccubic.testcase")
 elseif flag == "4"
-    @time testorderparam("../testfiles/dump.NiTi")
+    testorderparam("../testfiles/dump.NiTi")
 elseif flag == "5"
-    @time testanglebig("../testfiles/dump.NiTiBig")
+     testanglebig("../testfiles/dump.NiTiBig")
 else
     println("Testing all unit test functions!")
-    @time testneighbor(neighbor.neighborlist)
-    @time testangle(neighbor.neighborlist,angle.anglecalc)
+    @time testneighbor(neighbor.build)
+    @time testangle(neighbor.build,angle.anglecalc)
     @time testread(readlammps.readdump,"../testfiles/dump.NiTi")
     @time testwrite(writelammps.writedump,"../testfiles/dump.fccubic.testcase")
     @time testorderparam("../testfiles/dump.NiTi")

@@ -1,0 +1,13 @@
+#Input file for processing atomic data
+file data.lmp
+type data
+cutoff 12.00
+rdf true
+rdf_pair 1 Si Si
+rdf_pair 2 Si O
+rdf_pair 3 O  O
+angle true
+angle_pair 1 Si Si Si
+angle_pair 2 O Si  O
+angle_pair 3 Si O O
+angle_pair 4 O Si O

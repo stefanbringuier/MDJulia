@@ -84,4 +84,61 @@ function anglecalc(natoms::Integer,pos::Array,types::Array,neighlist::Array,boxd
     return thetas,intensity
 end
 
+
+#Multiple Dispatch - use types
+function anglecalc(atoms::Atoms,boxd::Cell,neighlist::Array,nbins=90)
+    
+    binsize = pi/nbins 
+    degbinsize = rad2deg(binsize) 
+    thetas = Float64[ (i*binsize) for i=1:nbins ]
+    thetas = rad2deg(thetas)
+    intensity = zeros(Int,nbins)
+
+    #Type Atoms does this already
+    #boxdinv = inv(boxd) #Invert matrix to scale coordinates
+    #spos = pos * boxdinv #Here the * operator is an array-array operator
+
+    for i=1:atoms.num
+        itype = atoms.typ[i]   
+        for jpair in enumerate(neighlist[i][1:end-1]) #jpair is a tuple (index,entry)
+            jtype = atoms.typ[jpair[2]]  
+            j = jpair[2]
+            sij = atoms.spos[j,:] - atoms.spos[i,:]
+            sij -= round(sij)
+            rij = vec(sij * boxd.cell)
+            magv1 = √(sum(rij.^2)) ::Float64
+            for k in neighlist[i][jpair[1]+1:end]
+                ktype = atoms.typ[k] 
+
+                #NOTE: spos[i,:] is 1x3 2D-Array
+                #PBC - Min. Image Conv., origin 0,0,0
+                sik = atoms.spos[k,:] - atoms.spos[i,:]
+                sik -= round(sik)
+                rik = vec(sik * boxd.cell) 
+                magv2 = √(sum(rik.^2)) ::Float64
+                dotprod = dot(rij,rik) ::Float64 
+                
+                costheta = dotprod / (magv1*magv2)::Float64
+                
+                #Might want to rework this so that binning is done
+                #with costheta, since acos() can give domainerror()
+                #when round-off occurs so we have to check this,
+                #for example when costheta=-1.00001
+                #Used defined constant radtodeg instead of rad2deg()
+                if costheta <= -1.000000 
+                    theta = 180.000000
+                else
+                    theta = acos(costheta) * radtodeg
+                end
+
+                ibin = int(theta/degbinsize) 
+                intensity[ibin] = intensity[ibin] + 1
+               
+             end
+        end
+    end
+    return thetas,intensity
+end
+
+
 end
