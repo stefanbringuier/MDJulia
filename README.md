@@ -1,14 +1,18 @@
+**NOTICE: Code usupported with Julia > v0.7**
+---
+
 A Julia based code to calculate atomic bond-angle distribution from
 molecular dynamics simulations. 
 
-Copyright (2015) Stefan Bringuier
-This software is distributed under the GNU General Public License.
-See LICENSE file for more details.
+>Copyright (2015) Stefan Bringuier
+>This software is distributed under the GNU General Public License.
+>See LICENSE file for more details.
 
 Program Hierarchy:
 README		this file
 USAGE		how to use this code
 LICENSE		the GNU General Public License (GPL)
+```shell
 src/		source files
 		--neighbor.jl		calculate neighbor list
 		--angle.jl 		calculate bond angles
@@ -17,7 +21,7 @@ src/		source files
 		--readlammps.jl		read LAMMPS dump and data format 
 		--writelammps.jl 	write LAMMPS dump and data format
 		--orderparam.jl         measure the order parameter of NiTi from Mutter et. al APL 2011					   
-			 			   	  
+```
 
 This code is a collection of Julia modules which contain various functions related to analyzing molecular dynamics simulation trajectories from the LAMMPS package. The code was written for two purposes:
 
